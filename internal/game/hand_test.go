@@ -15,7 +15,7 @@ func TestGroupScore(t *testing.T) {
 	score := hand.CalculateScore()
 
 	if score != 3 {
-		t.Errorf("Beklenen puan 3, alınan puan: %d", score)
+		t.Errorf("Expected score 3, got: %d", score)
 	}
 
 	foundGroup := false
@@ -26,7 +26,7 @@ func TestGroupScore(t *testing.T) {
 		}
 	}
 	if !foundGroup {
-		t.Error("Grup kombinasyonu bulunamadı")
+		t.Error("Group combination not found")
 	}
 }
 
@@ -41,7 +41,7 @@ func TestSeriesScore(t *testing.T) {
 	score := hand.CalculateScore()
 
 	if score != 3 {
-		t.Errorf("Beklenen puan 3, alınan puan: %d", score)
+		t.Errorf("Expected score 3, got: %d", score)
 	}
 
 	foundSeries := false
@@ -52,7 +52,7 @@ func TestSeriesScore(t *testing.T) {
 		}
 	}
 	if !foundSeries {
-		t.Error("Seri kombinasyonu bulunamadı")
+		t.Error("Series combination not found")
 	}
 }
 
@@ -66,7 +66,7 @@ func TestPairScore(t *testing.T) {
 	score := hand.CalculateScore()
 
 	if score != 2 {
-		t.Errorf("Beklenen puan 2, alınan puan: %d", score)
+		t.Errorf("Expected score 2, got: %d", score)
 	}
 
 	foundPair := false
@@ -77,7 +77,7 @@ func TestPairScore(t *testing.T) {
 		}
 	}
 	if !foundPair {
-		t.Error("Çift kombinasyonu bulunamadı")
+		t.Error("Pair combination not found")
 	}
 }
 
@@ -90,7 +90,7 @@ func TestOkeyReplacement(t *testing.T) {
 	hand := NewHand(tiles, okey)
 
 	if hand.Tiles[0] != okey {
-		t.Error("Sahte okey gerçek okeye dönüştürülmedi")
+		t.Error("Fake okey was not replaced with real okey")
 	}
 }
 
@@ -108,7 +108,7 @@ func TestMixedCombinations(t *testing.T) {
 	score := hand.CalculateScore()
 
 	if score != 6 {
-		t.Errorf("Beklenen puan 6, alınan puan: %d", score)
+		t.Errorf("Expected score 6, got: %d", score)
 	}
 }
 
@@ -124,7 +124,7 @@ func TestEdgeCases(t *testing.T) {
 	score := hand.CalculateScore()
 
 	if score != 4 {
-		t.Errorf("Beklenen puan 4, alınan puan: %d", score)
+		t.Errorf("Expected score 4, got: %d", score)
 	}
 }
 
@@ -139,7 +139,7 @@ func TestOkeyJoker(t *testing.T) {
 	score := hand.CalculateScore()
 
 	if score != 3 {
-		t.Errorf("Okey joker testi başarısız. Beklenen: 3, Alınan: %d", score)
+		t.Errorf("Okey joker test failed. Expected: 3, got: %d", score)
 	}
 }
 
@@ -153,6 +153,6 @@ func TestOkeyAsJokerInGroup(t *testing.T) {
 	hand := NewHand(tiles, okey)
 	score := hand.CalculateScore()
 	if score != 3 {
-		t.Errorf("Beklenen skor 3, alınan: %d", score)
+		t.Errorf("Expected score 3, got: %d", score)
 	}
 }

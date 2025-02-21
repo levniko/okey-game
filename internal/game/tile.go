@@ -15,17 +15,17 @@ const (
 func (c Color) String() string {
 	switch c {
 	case Yellow:
-		return "Sarı"
+		return "Yellow"
 	case Blue:
-		return "Mavi"
+		return "Blue"
 	case Black:
-		return "Siyah"
+		return "Black"
 	case Red:
-		return "Kırmızı"
+		return "Red"
 	case Fake:
-		return "Sahte"
+		return "Fake"
 	default:
-		return "Bilinmeyen"
+		return "Unknown"
 	}
 }
 

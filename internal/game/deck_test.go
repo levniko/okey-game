@@ -9,7 +9,7 @@ func TestDistributeTiles(t *testing.T) {
 	players := deck.DistributeTiles()
 
 	if len(players) != 4 {
-		t.Errorf("Oyuncu sayısı %d, olması gereken: 4", len(players))
+		t.Errorf("Number of players %d, expected: 4", len(players))
 	}
 
 	totalTiles := 0
@@ -22,16 +22,16 @@ func TestDistributeTiles(t *testing.T) {
 		if tileCount == 15 {
 			fifteenTilePlayerCount++
 		} else if tileCount != 14 {
-			t.Errorf("Oyuncu %d'nin taş sayısı %d, olması gereken: 14 veya 15",
+			t.Errorf("Player %d has %d tiles, expected: 14 or 15",
 				player.ID, tileCount)
 		}
 	}
 
 	if fifteenTilePlayerCount != 1 {
-		t.Error("15 taşı olan oyuncu sayısı 1 olmalı")
+		t.Error("There should be exactly 1 player with 15 tiles")
 	}
 
 	if totalTiles != 57 {
-		t.Errorf("Toplam dağıtılan taş sayısı %d, olması gereken: 57", totalTiles)
+		t.Errorf("Total number of distributed tiles %d, expected: 57", totalTiles)
 	}
 }

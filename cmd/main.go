@@ -67,7 +67,7 @@ func printUsedCombinations(score int, groups, series, pairs []game.Combination) 
 
 	groupScore := 0
 	for _, g := range groups {
-		if len(g.Tiles) >= 3 { 
+		if len(g.Tiles) >= 3 {
 			groupScore += len(g.Tiles)
 		}
 	}
@@ -82,7 +82,7 @@ func printUsedCombinations(score int, groups, series, pairs []game.Combination) 
 
 	seriesScore := 0
 	for _, s := range series {
-		if len(s.Tiles) >= 3 { 
+		if len(s.Tiles) >= 3 {
 			seriesScore += len(s.Tiles)
 		}
 	}
