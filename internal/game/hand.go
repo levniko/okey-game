@@ -131,7 +131,6 @@ func findAllGroups(hand []int) [][]int {
 		colorMap := make(map[int]bool)
 		uniqueTiles := make([]int, 0)
 
-		// Farklı renkleri seç
 		for _, tile := range tiles {
 			color := tile / 13
 			if !colorMap[color] {
@@ -150,7 +149,7 @@ func findAllGroups(hand []int) [][]int {
 
 func findAllSeries(hand []int) [][]int {
 	var series [][]int
-	for i := 0; i < len(hand); i++ {
+	for i := range hand {
 		color := hand[i] / 13
 		current := []int{hand[i]}
 
