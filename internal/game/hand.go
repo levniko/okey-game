@@ -2,39 +2,107 @@ package game
 
 import (
 	"math"
-	"slices"
+	"sort"
 )
 
 func CalculateHandScore(hand []int) int {
-	series := findAllSeries(hand)
-	groups := findAllGroups(hand)
-	series = append(series, groups...)
+	sortedHand := preprocessHand(hand)
+	series := findAllSeries(sortedHand)
+	groups := findAllGroups(sortedHand)
+	pairs := findAllPairs(sortedHand) // Çiftleri ekle
+	allCombos := mergeCombinations(series, groups)
+	allCombos = mergeCombinations(allCombos, pairs)
 
-	maxScore := 0
-	for _, combination := range series {
-		remaining := make([]int, 0)
-		handMap := make(map[int]bool)
-		for _, tile := range hand {
-			handMap[tile] = true
+	sort.Slice(allCombos, func(i, j int) bool {
+		return len(allCombos[i]) > len(allCombos[j])
+	})
+
+	maxScore := backtrackCombinations(allCombos, 0, 0, make(map[int]bool))
+	return int(math.Min(float64(maxScore), 14))
+}
+
+func mergeCombinations(a, b [][]int) [][]int {
+	result := make([][]int, len(a))
+	copy(result, a)
+	return append(result, b...)
+}
+
+func backtrackCombinations(combos [][]int, index int, currentScore int, used map[int]bool) int {
+	if index >= len(combos) {
+		return currentScore
+	}
+
+	maxScore := backtrackCombinations(combos, index+1, currentScore, used)
+
+	combo := combos[index]
+	if canUseCombo(combo, used) {
+		newUsed := make(map[int]bool)
+		for k, v := range used {
+			newUsed[k] = v
 		}
+		markUsed(combo, newUsed)
 
-		for _, tile := range combination {
-			delete(handMap, tile)
+		scoreWithCombo := backtrackCombinations(combos, index+1, currentScore+len(combo), newUsed)
+		if scoreWithCombo > maxScore {
+			maxScore = scoreWithCombo
 		}
-
-		for tile := range handMap {
-			remaining = append(remaining, tile)
-		}
-
-		if len(remaining) == 0 {
-			return len(combination)
-		}
-
-		score := CalculateHandScore(remaining)
-		maxScore = int(math.Max(float64(score+len(combination)), float64(maxScore)))
 	}
 
 	return maxScore
+}
+
+func canUseCombo(combo []int, used map[int]bool) bool {
+	for _, tile := range combo {
+		if tile != OK && used[tile] {
+			return false
+		}
+	}
+	return true
+}
+
+func markUsed(combo []int, used map[int]bool) {
+	for _, tile := range combo {
+		if tile != OK {
+			used[tile] = true
+		}
+	}
+}
+
+func preprocessHand(hand []int) []int {
+	sorted := make([]int, 0)
+	okeys := make([]int, 0)
+
+	for _, tile := range hand {
+		if tile == OK {
+			okeys = append(okeys, tile)
+		} else {
+			sorted = append(sorted, tile)
+		}
+	}
+	sort.Ints(sorted)
+	return append(sorted, okeys...)
+}
+
+func findAllPairs(hand []int) [][]int {
+	pairs := make([][]int, 0)
+	counts := make(map[int]int)
+
+	for _, tile := range hand {
+		counts[tile]++
+	}
+
+	for tile, count := range counts {
+		if count >= 2 {
+			pairs = append(pairs, []int{tile, tile})
+		}
+	}
+
+	okeyCount := counts[OK]
+	if okeyCount >= 2 {
+		pairs = append(pairs, []int{OK, OK})
+	}
+
+	return pairs
 }
 
 func CalculatePairScore(hand []int) int {
@@ -51,57 +119,32 @@ func CalculatePairScore(hand []int) int {
 }
 
 func findAllGroups(hand []int) [][]int {
-	groups := make([][]int, 13)
-	for i := range groups {
-		groups[i] = make([]int, 0)
-		if hand[len(hand)-1] == OK {
-			groups[i] = append(groups[i], OK)
-		}
-		if hand[len(hand)-2] == OK {
-			groups[i] = append(groups[i], OK)
-		}
-	}
+	groups := make(map[int][]int)
 
 	for _, tile := range hand {
 		num := tile % 13
-		exists := false
-		for _, t := range groups[num] {
-			if t == tile {
-				exists = true
-				break
-			}
-		}
-		if !exists {
-			groups[num] = append(groups[num], tile)
-		}
+		groups[num] = append(groups[num], tile)
 	}
 
 	var validGroups [][]int
-	for _, group := range groups {
-		for len(group) > 4 {
-			for i, tile := range group {
-				if tile == OK {
-					group = slices.Delete(group, i, i+1)
-					break
-				}
+	for _, tiles := range groups {
+		colorMap := make(map[int]bool)
+		uniqueTiles := make([]int, 0)
+
+		// Farklı renkleri seç
+		for _, tile := range tiles {
+			color := tile / 13
+			if !colorMap[color] {
+				colorMap[color] = true
+				uniqueTiles = append(uniqueTiles, tile)
 			}
 		}
 
-		if len(group) >= 3 {
-			validGroups = append(validGroups, slices.Clone(group))
-		}
-		if len(group) == 4 {
-			for i := range group {
-				newGroup := make([]int, 0)
-				for j, tile := range group {
-					if i != j {
-						newGroup = append(newGroup, tile)
-					}
-				}
-				validGroups = append(validGroups, newGroup)
-			}
+		if len(uniqueTiles) >= 3 {
+			validGroups = append(validGroups, uniqueTiles[:3])
 		}
 	}
+
 	return validGroups
 }
 
