@@ -6,77 +6,89 @@ import (
 )
 
 type Deck struct {
-	tiles     []Tile
-	indicator Tile
-	okeyTile  Tile
+	tiles     []int
+	indicator int
+	okey      int
+	players   []*Player
 }
 
 func NewDeck() *Deck {
 	rand.Seed(time.Now().UnixNano())
-
-	tiles := make([]Tile, 0, 106)
-	for i := range 53 {
-		tiles = append(tiles, NewTile(i))
-		tiles = append(tiles, NewTile(i))
+	d := &Deck{
+		players: make([]*Player, 4),
 	}
-
-	deck := &Deck{
-		tiles: tiles,
-	}
-
-	deck.Shuffle()
-
-	deck.setIndicatorAndOkey()
-
-	return deck
+	d.tiles = createAndShuffleTiles()
+	d.indicator = selectIndicator(d.tiles)
+	d.okey = findOkey(d.indicator)
+	d.distributeTilesToPlayers()
+	return d
 }
 
-func (d *Deck) Shuffle() {
-	n := len(d.tiles)
-	for i := n - 1; i > 0; i-- {
-		j := rand.Intn(i + 1)
-		d.tiles[i], d.tiles[j] = d.tiles[j], d.tiles[i]
-	}
-}
+func (d *Deck) distributeTilesToPlayers() {
+	playerWith15 := rand.Intn(4)
 
-func (d *Deck) setIndicatorAndOkey() {
-	d.indicator = d.tiles[len(d.tiles)-1]
-	if d.indicator.ID == 52 {
-		d.indicator = d.tiles[len(d.tiles)-2]
-	}
-	d.okeyTile.Number = (d.indicator.Number % 13) + 1
-	d.okeyTile.Color = d.indicator.Color
-}
-
-func (d *Deck) DistributeTiles() []Player {
-	players := make([]Player, 4)
-	for i := range players {
-		players[i] = Player{ID: i}
-	}
-
-	luckyPlayer := rand.Intn(4)
-	currentTile := 0
-
-	for i := range players {
-		tileCount := 14
-		if i == luckyPlayer {
+	tileStart := 0
+	for i := 0; i < 4; i++ {
+		var tileCount int
+		if i == playerWith15 {
 			tileCount = 15
+		} else {
+			tileCount = 14
 		}
 
-		players[i].Tiles = make([]Tile, tileCount)
-		for j := 0; j < tileCount; j++ {
-			players[i].Tiles[j] = d.tiles[currentTile]
-			currentTile++
-		}
+		d.players[i] = NewPlayer(d.tiles[tileStart : tileStart+tileCount])
+		d.players[i].AdjustOkeyTiles(d.okey)
+		tileStart += tileCount
 	}
-
-	return players
 }
 
-func (d *Deck) GetIndicator() Tile {
+func (d *Deck) GetPlayers() []*Player {
+	return d.players
+}
+
+func (d *Deck) GetPlayerWith15() int {
+	for i, player := range d.players {
+		if len(player.GetHand()) == 15 {
+			return i
+		}
+	}
+	return -1
+}
+
+func (d *Deck) GetTiles() []int {
+	return d.tiles
+}
+
+func (d *Deck) GetIndicator() int {
 	return d.indicator
 }
 
-func (d *Deck) GetOkeyTile() Tile {
-	return d.okeyTile
+func (d *Deck) GetOkey() int {
+	return d.okey
+}
+
+func createAndShuffleTiles() []int {
+	tiles := make([]int, TotalTiles)
+	for i := 0; i < TotalTiles; i++ {
+		tiles[i] = i % DeckSize
+	}
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(tiles), func(i, j int) {
+		tiles[i], tiles[j] = tiles[j], tiles[i]
+	})
+	return tiles
+}
+
+func selectIndicator(tiles []int) int {
+	if tiles[TotalTiles-1] != 52 {
+		return tiles[TotalTiles-1]
+	}
+	return tiles[TotalTiles-2]
+}
+
+func findOkey(indicator int) int {
+	if (indicator+1)%13 == 0 {
+		return indicator - 12
+	}
+	return indicator + 1
 }
